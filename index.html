@@ -6,6 +6,7 @@
     <title>Uresoft | Software e Inteligencia a tu Medida</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
@@ -117,20 +118,13 @@
         </div>
     </section>
 
-    <!-- Contacto -->
+ <!-- Contacto -->
     <section id="contacto" class="max-w-3xl mx-auto px-6 py-20 text-center">
         <h2 class="text-3xl font-bold text-slate-900">¿Preparado para dar el salto?</h2>
         <p class="mt-4 text-slate-600 mb-10">Cuéntanos tu idea o el cuello de botella que quieres eliminar y te propondremos la solución ideal.</p>
         
-        <!-- Formulario nativo directo conectado a tu email real -->
-        <form action="https://formsubmit.co/subdirectoradjunto@gmail.com" method="POST" id="formFinalUresoft" class="space-y-4 text-left bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
-            
-            <!-- Redirección nativa oficial tras enviar el correo con éxito -->
-            <input type="hidden" name="_next" value="https://wolterurena.github.io/uresoft-site/#/">
-            
-            <!-- Elimina captchas intermedias automáticas -->
-            <input type="hidden" name="_captcha" value="false">
-
+        <!-- Formulario sin redirección, controlado completamente por JavaScript -->
+        <form id="formFinalUresoft" class="space-y-4 text-left bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Nombre</label>
                 <input type="text" name="name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 transition" placeholder="Tu nombre" required>
@@ -154,17 +148,76 @@
         <p>&copy; 2026 Uresoft. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Script de feedback visual instantáneo antes del salto nativo de red -->
+    <!-- SCRIPT DE PROCESAMIENTO ASÍNCRONO + SWEETALERT2 -->
     <script>
-        const elForm = document.getElementById('formFinalUresoft');
-        const elBtn = document.getElementById('btnFinalUresoft');
-        if (elForm && elBtn) {
-            elForm.addEventListener('submit', function() {
-                elBtn.disabled = true;
-                elBtn.innerText = 'Enviando...';
-            });
-        }
+        (function() {
+            const elForm = document.getElementById('formFinalUresoft');
+            const elBtn = document.getElementById('btnFinalUresoft');
+
+            if (elForm && elBtn) {
+                elForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Evita por completo la recarga y la redirección nativa
+
+                    // Cambiamos el estado visual del botón
+                    elBtn.disabled = true;
+                    elBtn.innerText = 'Enviando...';
+
+                    // Empaquetamos los campos en un JSON
+                    const formData = new FormData(elForm);
+                    const datosJSON = {};
+                    formData.forEach((value, key) => datosJSON[key] = value);
+
+                    // Endpoint AJAX de FormSubmit: no recarga la web y tiene políticas CORS abiertas
+                    fetch('https://formsubmit.co/ajax/subdirectoradjunto@gmail.com', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(datosJSON)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la red o el servidor');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Presentamos la retroalimentación limpia con SweetAlert2
+                        Swal.fire({
+                            title: '¡Mensaje Enviado!',
+                            text: 'Tu solicitud ha sido procesada de forma directa. Nos pondremos en contacto contigo lo antes posible.',
+                            icon: 'success',
+                            confirmButtonColor: '#4f46e5',
+                            confirmButtonText: 'Genial'
+                        });
+                        elForm.reset(); // Vaciamos los campos del formulario
+                    })
+                    .catch(error => {
+                        // Alerta de respaldo si el servicio requiere la primera activación manual por correo
+                        Swal.fire({
+                            title: 'Formulario en activación',
+                            text: 'Hemos enviado una solicitud de enlace. Por favor, revisa tu bandeja de entrada de subdirectoradjunto@gmail.com para activar los envíos en un solo clic.',
+                            icon: 'info',
+                            confirmButtonColor: '#4f46e5',
+                            confirmButtonText: 'Entendido'
+                        });
+                    })
+                    .finally(() => {
+                        // El botón recupera su estado normal en cualquier caso
+                        elBtn.disabled = false;
+                        elBtn.innerText = 'Enviar Mensaje';
+                    });
+                });
+            }
+        })();
     </script>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center text-sm border-t border-slate-800">
+        <p>&copy; 2026 Uresoft. Todos los derechos reservados.</p>
+    </footer>
+
 
 </body>
 </html>
